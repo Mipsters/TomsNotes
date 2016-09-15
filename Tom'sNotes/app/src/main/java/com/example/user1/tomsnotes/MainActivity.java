@@ -8,6 +8,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.TextView;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +33,19 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener((view) ->
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show());
+
+        GridView gv = (GridView) findViewById(R.id.gridView);
+
+       NodeServiceLocal nsl = new NodeServiceLocal(this);
+
+        ArrayList<Note> notes = new ArrayList<>();
+
+        notes.add(new Note("title1","text1"));
+        notes.add(new Note("title2","text2"));
+        notes.add(new Note("title3","text3"));
+        notes.add(new Note("title4","text4"));
+
+        gv.setAdapter(new GridViewAdapter(notes));
     }
 
     @Override
@@ -45,5 +68,44 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    class GridViewAdapter extends BaseAdapter{
+
+        ArrayList<Note> data;
+
+        public GridViewAdapter(ArrayList arrayList){
+            data = arrayList;
+        }
+
+        @Override
+        public int getCount() {
+            return data.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return data.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            convertView = getLayoutInflater().inflate(R.layout.gridview_child,null);
+
+            TextView title = (TextView)convertView.findViewById(R.id.textView);
+            TextView text = (TextView)convertView.findViewById(R.id.textView2);
+
+            Note note = data.get(position);
+
+            title.setText(note.getTitle());
+            text.setText(note.getText());
+
+            return convertView;
+        }
     }
 }
