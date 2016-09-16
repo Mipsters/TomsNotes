@@ -19,11 +19,11 @@ import java.util.List;
  */
 public class NodeServiceLocal implements NoteActions {
 
-    List<Note> notes;
+    ArrayList<Note> notes;
 
     public NodeServiceLocal(Context context) throws IOException {
         notes = new ArrayList<>();
-
+        
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(
                 context.openFileInput("notes.txt")));
@@ -62,7 +62,7 @@ public class NodeServiceLocal implements NoteActions {
     }
 
     @Override
-    public List<Note> getNotes() {
-        return Collections.unmodifiableList(notes);
+    public ArrayList<Note> getNotes() {
+        return notes;
     }
 }

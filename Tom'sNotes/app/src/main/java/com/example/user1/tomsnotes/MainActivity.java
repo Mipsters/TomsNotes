@@ -1,5 +1,7 @@
 package com.example.user1.tomsnotes;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,10 +11,13 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -30,44 +35,49 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener((view) ->
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+        fab.setOnClickListener(v ->
+                Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show());
 
         GridView gv = (GridView) findViewById(R.id.gridView);
+        /*
+        NodeServiceLocal nsl = null;
 
-       NodeServiceLocal nsl = new NodeServiceLocal(this);
+        try {
+            nsl = new NodeServiceLocal(this);
+        }catch (Exception e){
+            Toast.makeText(this,e.toString(),Toast.LENGTH_LONG).show();
+        }
+
+        ArrayList<Note> notes = null;
+
+        if(nsl != null) {
+            notes = nsl.getNotes();
+            gv.setAdapter(new GridViewAdapter(notes));
+        }
+        else
+            Toast.makeText(this,"damn",Toast.LENGTH_SHORT).show();
+        */
 
         ArrayList<Note> notes = new ArrayList<>();
 
-        notes.add(new Note("title1","text1"));
-        notes.add(new Note("title2","text2"));
-        notes.add(new Note("title3","text3"));
-        notes.add(new Note("title4","text4"));
+        notes.add(new Note("title 1","text 1"));
+        notes.add(new Note("title 2","text 2"));
+        notes.add(new Note("title 3","text 3"));
+        notes.add(new Note("title 4","text 4"));
+        notes.add(new Note("title 5","text 5"));
 
         gv.setAdapter(new GridViewAdapter(notes));
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+        gv.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(this, NoteEdit.class);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+            intent.putExtra("title",notes.get(position).getTitle());
+            intent.putExtra("text",notes.get(position).getText());
+            intent.putExtra("loc",position);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+            startActivity(intent);
+        });
     }
 
     class GridViewAdapter extends BaseAdapter{
