@@ -1,6 +1,7 @@
 package com.example.user1.tomsnotes;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,13 +21,20 @@ import java.util.List;
 public class NodeServiceLocal implements NoteActions {
 
     ArrayList<Note> notes;
+    Context context;
 
     public NodeServiceLocal(Context context) throws IOException {
+        this.context = context;
         notes = new ArrayList<>();
-        
+
+        File file = new File(context.getFilesDir(),"notes.txt");
+
+        if(!file.exists())
+            file.createNewFile();
+
         BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                context.openFileInput("notes.txt")));
+                            new InputStreamReader(
+                            context.openFileInput("notes.txt")));
 
         String line, strdata = "";
 
@@ -35,16 +43,17 @@ public class NodeServiceLocal implements NoteActions {
 
         String[] allData = strdata.split(Character.toString((char) 6));
 
-        for(String oneData: allData) {
+        for(String oneData : allData) {
             String[] data = oneData.split(Character.toString((char) 7));
-            notes.add(new Note(data[0], data[1]));
+            if(data.length == 2)
+                notes.add(new Note(data[0], data[1]));
         }
 
         in.close();
     }
 
     @Override
-    public void saveNote(Context context,Note note) throws IOException {
+    public void saveNote(Note note) throws IOException {
         notes.add(note);
 
         PrintWriter out = new PrintWriter(

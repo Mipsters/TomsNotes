@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface NoteActions {
 
-    void saveNote(Context context, Note note) throws IOException;
+    void saveNote(Note note) throws IOException;
 
     void deleteNote(Note note);
 

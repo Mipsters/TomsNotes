@@ -19,6 +19,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,25 +41,16 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show());
 
         GridView gv = (GridView) findViewById(R.id.gridView);
-        /*
+
         NodeServiceLocal nsl = null;
 
         try {
             nsl = new NodeServiceLocal(this);
-        }catch (Exception e){
-            Toast.makeText(this,e.toString(),Toast.LENGTH_LONG).show();
-        }
+        }catch (Exception e){ }
 
-        ArrayList<Note> notes = null;
-
-        if(nsl != null) {
-            notes = nsl.getNotes();
-            gv.setAdapter(new GridViewAdapter(notes));
-        }
-        else
-            Toast.makeText(this,"damn",Toast.LENGTH_SHORT).show();
-        */
-
+        final ArrayList<Note> notes = nsl.getNotes();
+        gv.setAdapter(new GridViewAdapter(notes));
+        /*
         ArrayList<Note> notes = new ArrayList<>();
 
         notes.add(new Note("title 1","text 1"));
@@ -66,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         notes.add(new Note("title 3","text 3"));
         notes.add(new Note("title 4","text 4"));
         notes.add(new Note("title 5","text 5"));
+        */
 
         gv.setAdapter(new GridViewAdapter(notes));
 
