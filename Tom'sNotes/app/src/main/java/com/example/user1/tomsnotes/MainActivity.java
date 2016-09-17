@@ -17,7 +17,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     static NodeServiceLocal nsl;
-    private Boolean delete;
+    private Boolean delete = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +50,22 @@ public class MainActivity extends AppCompatActivity {
             });
 
             gv.setOnItemLongClickListener((parent, view, position, id) -> {
-                delete = true;
+                if(!delete) {
+                    delete = true;
 
-                Snackbar.make(view,"deleting note...",Snackbar.LENGTH_LONG)
-                        .setCallback(new Snackbar.Callback() {
-                    @Override
-                    public void onDismissed(Snackbar snackbar, int event) {
-                        if(delete) {
-                            nsl.deleteNote(position);
-                            gv.setAdapter(new GridViewAdapter(notes));
-                        }
-                    }
-                }).setAction("cancel", (v) -> delete = false)
-                        .show();
+                    Snackbar.make(view, "deleting note...", Snackbar.LENGTH_LONG)
+                            .setCallback(new Snackbar.Callback() {
+                                @Override
+                                public void onDismissed(Snackbar snackbar, int event) {
+                                    if (delete) {
+                                        nsl.deleteNote(position);
+                                        gv.setAdapter(new GridViewAdapter(notes));
+                                        delete = false;
+                                    }
+                                }
+                            }).setAction("cancel", (v) -> delete = false)
+                            .show();
+                }
                 return true;
             });
         }catch (Exception e){

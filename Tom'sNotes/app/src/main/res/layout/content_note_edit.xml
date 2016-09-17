@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.user1.tomsnotes.NoteEdit"
-    tools:showIn="@layout/activity_note_edit">
+    tools:showIn="@layout/activity_note_edit" >
 
     <EditText
         android:layout_width="match_parent"
