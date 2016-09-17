@@ -17,6 +17,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     static NodeServiceLocal nsl;
+    private Boolean delete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             nsl = new NodeServiceLocal(this);
-            final List<Note> notes = nsl.getNotes();
+            List<Note> notes = nsl.getNotes();
 
             gv.setAdapter(new GridViewAdapter(notes));
 
@@ -46,6 +47,23 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("loc",position);
 
                 startActivity(intent);
+            });
+
+            gv.setOnItemLongClickListener((parent, view, position, id) -> {
+                delete = true;
+
+                Snackbar.make(view,"deleting note...",Snackbar.LENGTH_LONG)
+                        .setCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event) {
+                        if(delete) {
+                            nsl.deleteNote(position);
+                            gv.setAdapter(new GridViewAdapter(notes));
+                        }
+                    }
+                }).setAction("cancel", (v) -> delete = false)
+                        .show();
+                return true;
             });
         }catch (Exception e){
             Snackbar.make(coordinatorLayout, "Cannot load the notes", Snackbar.LENGTH_LONG).show();

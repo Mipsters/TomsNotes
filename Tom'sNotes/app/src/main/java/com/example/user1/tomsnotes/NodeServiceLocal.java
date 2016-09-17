@@ -1,13 +1,10 @@
 package com.example.user1.tomsnotes;
 
 import android.content.Context;
-import android.util.Log;
+import android.os.AsyncTask;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -20,63 +17,36 @@ import java.util.List;
  */
 public class NodeServiceLocal implements NoteActions {
 
-    ArrayList<Note> notes;
-    Context context;
+    private ArrayList<Note> notes;
+    private Context context;
+    private Note note;
 
     public NodeServiceLocal(Context context) throws IOException {
         this.context = context;
         notes = new ArrayList<>();
+        this.note = null;
 
-        File file = new File(context.getFilesDir(),"notes.txt");
-
-        if(!file.exists())
-            file.createNewFile();
-
-        BufferedReader in = new BufferedReader(
-                            new InputStreamReader(
-                            context.openFileInput("notes.txt")));
-
-        String line, strdata = "";
-
-        while((line = in.readLine()) != null)
-            strdata += line;
-
-        Log.e("data",strdata);
-
-        String[] allData = strdata.split(Character.toString((char) 6));
-
-        for(String oneData : allData) {
-            String[] data = oneData.split(Character.toString((char) 7));
-            if(data.length == 2)
-                notes.add(new Note(data[0], data[1]));
-        }
-
-        in.close();
+        new FileManagmentTask().execute(0);
     }
 
     @Override
     public void saveNote(Note note) throws IOException {
         notes.add(note);
+        this.note = note;
 
-        PrintWriter out = new PrintWriter(
-                context.openFileOutput("notes.txt",Context.MODE_APPEND));
-
-        out.print(note.getTitle() + Character.toString((char) 7) +
-                  note.getText() + Character.toString((char) 6));
-
-        out.close();
+        new FileManagmentTask().execute(1);
     }
 
     @Override
     public void deleteNote(int location) {
         notes.remove(location);
-        recreateFile();
+        new FileManagmentTask().execute(2);
     }
 
     @Override
     public void editNote(int location, Note newNote) {
         notes.set(location,newNote);
-        recreateFile();
+        new FileManagmentTask().execute(2);
     }
 
     @Override
@@ -89,15 +59,67 @@ public class NodeServiceLocal implements NoteActions {
         while(!file.delete());
 
         try {
-            PrintWriter out = new PrintWriter(
-                    context.openFileOutput("notes.txt",Context.MODE_PRIVATE));
-
             file.createNewFile();
+
+            PrintWriter out = new PrintWriter(
+                    context.openFileOutput("notes.txt",Context.MODE_APPEND));
 
             for (Note note: notes)
                 out.print(note.getTitle() + Character.toString((char) 7) +
                         note.getText() + Character.toString((char) 6));
-        } catch (IOException e) { }
 
+            out.flush();
+
+        } catch (IOException e) { }
+    }
+
+    private class FileManagmentTask extends AsyncTask<Integer, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Integer... params) {
+            try {
+                switch (params[0]) {
+                    case 0:
+                        File file = new File(context.getFilesDir(), "notes.txt");
+
+                        if (!file.createNewFile());
+
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(
+                                        context.openFileInput("notes.txt")));
+
+                        String line, strdata = "";
+
+                        while ((line = in.readLine()) != null)
+                            strdata += line;
+
+                        String[] allData = strdata.split(Character.toString((char) 6));
+
+                        for (String oneData : allData) {
+                            String[] data = oneData.split(Character.toString((char) 7));
+                            if (data.length == 2)
+                                notes.add(new Note(data[0], data[1]));
+                        }
+
+                        in.close();
+                        break;
+                    case 1:
+                        PrintWriter out = new PrintWriter(
+                                context.openFileOutput("notes.txt",Context.MODE_APPEND));
+
+                        out.print(note.getTitle() + Character.toString((char) 7) +
+                                note.getText() + Character.toString((char) 6));
+                        out.flush();
+                        note = null;
+
+                        out.close();
+                        break;
+                    case 2:
+                        recreateFile();
+                        break;
+                }
+            }catch (Exception e){}
+            return null;
+        }
     }
 }
