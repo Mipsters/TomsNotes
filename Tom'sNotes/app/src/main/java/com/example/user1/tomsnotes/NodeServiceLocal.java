@@ -41,6 +41,8 @@ public class NodeServiceLocal implements NoteActions {
         while((line = in.readLine()) != null)
             strdata += line;
 
+        Log.e("data",strdata);
+
         String[] allData = strdata.split(Character.toString((char) 6));
 
         for(String oneData : allData) {
@@ -57,7 +59,7 @@ public class NodeServiceLocal implements NoteActions {
         notes.add(note);
 
         PrintWriter out = new PrintWriter(
-                context.openFileOutput("notes.txt",Context.MODE_PRIVATE));
+                context.openFileOutput("notes.txt",Context.MODE_APPEND));
 
         out.print(note.getTitle() + Character.toString((char) 7) +
                   note.getText() + Character.toString((char) 6));
@@ -66,12 +68,36 @@ public class NodeServiceLocal implements NoteActions {
     }
 
     @Override
-    public void deleteNote(Note note) {
-
+    public void deleteNote(int location) {
+        notes.remove(location);
+        recreateFile();
     }
 
     @Override
-    public ArrayList<Note> getNotes() {
-        return notes;
+    public void editNote(int location, Note newNote) {
+        notes.set(location,newNote);
+        recreateFile();
+    }
+
+    @Override
+    public List<Note> getNotes() {
+        return Collections.unmodifiableList(notes);
+    }
+
+    private void recreateFile(){
+        File file = new File(context.getFilesDir(),"notes.txt");
+        while(!file.delete());
+
+        try {
+            PrintWriter out = new PrintWriter(
+                    context.openFileOutput("notes.txt",Context.MODE_PRIVATE));
+
+            file.createNewFile();
+
+            for (Note note: notes)
+                out.print(note.getTitle() + Character.toString((char) 7) +
+                        note.getText() + Character.toString((char) 6));
+        } catch (IOException e) { }
+
     }
 }

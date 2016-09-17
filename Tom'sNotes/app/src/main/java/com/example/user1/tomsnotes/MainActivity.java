@@ -1,84 +1,65 @@
 package com.example.user1.tomsnotes;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    static NodeServiceLocal nsl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(v ->
-                Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show());
-
         GridView gv = (GridView) findViewById(R.id.gridView);
 
-        NodeServiceLocal nsl = null;
+        fab.setOnClickListener(v ->
+            startActivity(new Intent(this, NoteEdit.class)));
+
+        nsl = null;
 
         try {
             nsl = new NodeServiceLocal(this);
-        }catch (Exception e){ }
+            final List<Note> notes = nsl.getNotes();
 
-        final ArrayList<Note> notes = nsl.getNotes();
-        gv.setAdapter(new GridViewAdapter(notes));
-        /*
-        ArrayList<Note> notes = new ArrayList<>();
+            gv.setAdapter(new GridViewAdapter(notes));
 
-        notes.add(new Note("title 1","text 1"));
-        notes.add(new Note("title 2","text 2"));
-        notes.add(new Note("title 3","text 3"));
-        notes.add(new Note("title 4","text 4"));
-        notes.add(new Note("title 5","text 5"));
-        */
+            gv.setOnItemClickListener((parent, view, position, id) -> {
+                Intent intent = new Intent(this, NoteEdit.class);
 
-        gv.setAdapter(new GridViewAdapter(notes));
+                intent.putExtra("title",notes.get(position).getTitle());
+                intent.putExtra("text",notes.get(position).getText());
+                intent.putExtra("loc",position);
 
-        gv.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(this, NoteEdit.class);
+                startActivity(intent);
+            });
+        }catch (Exception e){
+            Snackbar.make(coordinatorLayout, "Cannot load the notes", Snackbar.LENGTH_LONG).show();
+        }
 
-            intent.putExtra("title",notes.get(position).getTitle());
-            intent.putExtra("text",notes.get(position).getText());
-            intent.putExtra("loc",position);
 
-            startActivity(intent);
-        });
     }
 
     class GridViewAdapter extends BaseAdapter{
 
-        ArrayList<Note> data;
+        List<Note> data;
 
-        public GridViewAdapter(ArrayList arrayList){
-            data = arrayList;
+        public GridViewAdapter(List list){
+            data = list;
         }
 
         @Override

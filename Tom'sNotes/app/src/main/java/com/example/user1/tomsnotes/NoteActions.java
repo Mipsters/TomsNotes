@@ -12,7 +12,9 @@ public interface NoteActions {
 
     void saveNote(Note note) throws IOException;
 
-    void deleteNote(Note note);
+    void deleteNote(int location);
+
+    void editNote(int locaton, Note newNote);
 
     List<Note> getNotes();
 }
