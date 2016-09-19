@@ -145,7 +145,7 @@ public class NodeServiceLocal implements NoteActions {
             PrintWriter out = new PrintWriter(
                     context.openFileOutput(NOTE_NAME,Context.MODE_APPEND));
 
-            for (Note note: notes)
+            for (Note note : notes)
                 out.print(note.getTitle() + FileChars.INNER_SEPARATOR +
                         note.getText() + FileChars.OUTER_SEPARATOR);
 

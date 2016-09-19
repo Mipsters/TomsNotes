@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             nsl = new NodeServiceLocal(this);
             List<Note> notes = nsl.getNotes();
-            notes.add(new Note("test","test"));
+            
             gv.setAdapter(new GridViewAdapter(notes));
 
             gv.setOnItemClickListener((parent, view, position, id) -> {
