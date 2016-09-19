@@ -17,7 +17,28 @@ import java.util.List;
  */
 public class NodeServiceLocal implements NoteActions {
 
+    private static final String NOTE_NAME = "notes.txt";
     private enum FileManagment {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
+    private enum FileChars {
+        EMPTY_FILE {
+            @Override
+            public String toString(){
+                return Character.toString((char)5);
+            }
+        },
+        INNER_SEPERATOR{
+            @Override
+            public String toString(){
+                return Character.toString((char)6);
+            }
+        },
+        OUTER_SEPERATOR{
+            @Override
+            public String toString(){
+                return Character.toString((char)7);
+            }
+        }
+    }
 
     private ArrayList<Note> notes;
     private Context context;
@@ -34,7 +55,7 @@ public class NodeServiceLocal implements NoteActions {
     @Override
     public void saveNote(Note note) throws IOException {
         if(note.getText().equals(""))
-            note.setText(Character.toString((char)5));
+            note.setText(FileChars.EMPTY_FILE.toString());
 
         notes.add(note);
         this.note = note;
@@ -79,27 +100,26 @@ public class NodeServiceLocal implements NoteActions {
     }
 
     private void readFromFile(){
-        File file = new File(context.getFilesDir(), "notes.txt");
+        File file = new File(context.getFilesDir(), NOTE_NAME);
 
         try {
-            if (!file.exists())
-                file.createNewFile();
+            file.createNewFile();
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(
-                            context.openFileInput("notes.txt")));
+                            context.openFileInput(NOTE_NAME)));
 
             String line, strdata = "";
 
             while ((line = in.readLine()) != null)
                 strdata += line + '\n';
 
-            String[] allData = strdata.split(Character.toString((char) 6));
+            String[] allData = strdata.split(FileChars.INNER_SEPERATOR.toString());
 
             for (String oneData : allData) {
-                String[] data = oneData.split(Character.toString((char) 7));
+                String[] data = oneData.split(FileChars.OUTER_SEPERATOR.toString());
                 if (data.length == 2)
-                    notes.add(new Note(data[0], data[1].equals(Character.toString((char) 5)) ? "" : data[1]));
+                    notes.add(new Note(data[0], data[1].equals(FileChars.EMPTY_FILE) ? "" : data[1]));
             }
 
             in.close();
@@ -109,10 +129,10 @@ public class NodeServiceLocal implements NoteActions {
     private void writeToFile(){
         try {
             PrintWriter out = new PrintWriter(
-                    context.openFileOutput("notes.txt", Context.MODE_APPEND));
+                    context.openFileOutput(NOTE_NAME, Context.MODE_APPEND));
 
-            out.print(note.getTitle() + Character.toString((char) 7) +
-                    note.getText() + Character.toString((char) 6));
+            out.print(note.getTitle() + FileChars.OUTER_SEPERATOR +
+                    note.getText() + FileChars.INNER_SEPERATOR);
             out.flush();
             note = null;
 
@@ -121,7 +141,7 @@ public class NodeServiceLocal implements NoteActions {
     }
 
     private void recreateFile(){
-        File file = new File(context.getFilesDir(),"notes.txt");
+        File file = new File(context.getFilesDir(), NOTE_NAME);
 
         while(!file.delete());
 
@@ -129,11 +149,11 @@ public class NodeServiceLocal implements NoteActions {
             file.createNewFile();
 
             PrintWriter out = new PrintWriter(
-                    context.openFileOutput("notes.txt",Context.MODE_APPEND));
+                    context.openFileOutput(NOTE_NAME,Context.MODE_APPEND));
 
             for (Note note: notes)
-                out.print(note.getTitle() + Character.toString((char) 7) +
-                        note.getText() + Character.toString((char) 6));
+                out.print(note.getTitle() + FileChars.OUTER_SEPERATOR +
+                        note.getText() + FileChars.INNER_SEPERATOR);
 
             out.flush();
 
