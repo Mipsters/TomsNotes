@@ -44,12 +44,10 @@ public class NodeServiceLocal implements NoteActions {
 
     private ArrayList<Note> notes;
     private Context context;
-    private Note note;
 
     public NodeServiceLocal(Context context) throws IOException {
         this.context = context;
         notes = new ArrayList<>();
-        this.note = null;
 
         new FileManagmentTask().execute(FileManagment.READ_FROM_FILE);
     }
@@ -60,9 +58,8 @@ public class NodeServiceLocal implements NoteActions {
             note.setText(FileChars.EMPTY_FILE.toString());
 
         notes.add(note);
-        this.note = note;
 
-        new FileManagmentTask().execute(FileManagment.WRITE_TO_FILE);
+        new FileManagmentTask(note).execute(FileManagment.WRITE_TO_FILE);
     }
 
     @Override
@@ -83,6 +80,13 @@ public class NodeServiceLocal implements NoteActions {
     }
 
     private class FileManagmentTask extends AsyncTask<FileManagment, Void, Void>{
+        private Note note;
+
+        public FileManagmentTask(){}
+
+        public FileManagmentTask(Note note){
+            this.note = note;
+        }
 
         @Override
         protected Void doInBackground(FileManagment... params) {
@@ -91,7 +95,7 @@ public class NodeServiceLocal implements NoteActions {
                     scanFromFile();
                     break;
                 case WRITE_TO_FILE:
-                    writeToFile();
+                    writeToFile(note);
                     break;
                 case REWRITE_FILE:
                     recreateFile();
@@ -118,15 +122,13 @@ public class NodeServiceLocal implements NoteActions {
         } catch (Exception e) { }
     }
 
-    private void writeToFile(){
+    private void writeToFile(Note note){
         try {
             PrintWriter out = new PrintWriter(
                     context.openFileOutput(NOTE_NAME, Context.MODE_APPEND));
 
             out.print(note.getTitle() + FileChars.INNER_SEPERATOR +
                     note.getText() + FileChars.OUTER_SEPERATOR);
-
-            note = null;
 
             out.close();
         }catch (Exception e){}
