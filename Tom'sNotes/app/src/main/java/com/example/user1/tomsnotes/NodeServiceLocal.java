@@ -20,7 +20,7 @@ import java.util.Scanner;
 public class NodeServiceLocal implements NoteActions {
 
     private static final String NOTE_NAME = "notes.txt";
-    private enum FileManagment {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
+    private enum FileManagement {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
     private enum FileChars {
         EMPTY_FILE {
             @Override
@@ -28,13 +28,13 @@ public class NodeServiceLocal implements NoteActions {
                 return Character.toString((char)5);
             }
         },
-        OUTER_SEPERATOR{
+        OUTER_SEPARATOR{
             @Override
             public String toString(){
                 return Character.toString((char)6);
             }
         },
-        INNER_SEPERATOR{
+        INNER_SEPARATOR{
             @Override
             public String toString(){
                 return Character.toString((char)7);
@@ -49,7 +49,7 @@ public class NodeServiceLocal implements NoteActions {
         this.context = context;
         notes = new ArrayList<>();
 
-        new FileManagmentTask().execute(FileManagment.READ_FROM_FILE);
+        new FileManagementTask().execute(FileManagement.READ_FROM_FILE);
     }
 
     @Override
@@ -59,19 +59,19 @@ public class NodeServiceLocal implements NoteActions {
 
         notes.add(note);
 
-        new FileManagmentTask(note).execute(FileManagment.WRITE_TO_FILE);
+        new FileManagementTask(note).execute(FileManagement.WRITE_TO_FILE);
     }
 
     @Override
     public void deleteNote(int location) {
         notes.remove(location);
-        new FileManagmentTask().execute(FileManagment.REWRITE_FILE);
+        new FileManagementTask().execute(FileManagement.REWRITE_FILE);
     }
 
     @Override
     public void editNote(int location, Note newNote) {
         notes.set(location,newNote);
-        new FileManagmentTask().execute(FileManagment.REWRITE_FILE);
+        new FileManagementTask().execute(FileManagement.REWRITE_FILE);
     }
 
     @Override
@@ -79,17 +79,17 @@ public class NodeServiceLocal implements NoteActions {
         return Collections.unmodifiableList(notes);
     }
 
-    private class FileManagmentTask extends AsyncTask<FileManagment, Void, Void>{
+    private class FileManagementTask extends AsyncTask<FileManagement, Void, Void>{
         private Note note;
 
-        public FileManagmentTask(){}
+        public FileManagementTask(){}
 
-        public FileManagmentTask(Note note){
+        public FileManagementTask(Note note){
             this.note = note;
         }
 
         @Override
-        protected Void doInBackground(FileManagment... params) {
+        protected Void doInBackground(FileManagement... params) {
             switch (params[0]) {
                 case READ_FROM_FILE:
                     scanFromFile();
@@ -112,10 +112,10 @@ public class NodeServiceLocal implements NoteActions {
             file.createNewFile();
 
             Scanner read = new Scanner(context.openFileInput(NOTE_NAME));
-            read.useDelimiter(FileChars.OUTER_SEPERATOR.toString());
+            read.useDelimiter(FileChars.OUTER_SEPARATOR.toString());
 
             while(read.hasNext()) {
-                String[] data = read.next().split(FileChars.INNER_SEPERATOR.toString());
+                String[] data = read.next().split(FileChars.INNER_SEPARATOR.toString());
                 if (data.length == 2)
                     notes.add(new Note(data[0],data[1]));
             }
@@ -127,8 +127,8 @@ public class NodeServiceLocal implements NoteActions {
             PrintWriter out = new PrintWriter(
                     context.openFileOutput(NOTE_NAME, Context.MODE_APPEND));
 
-            out.print(note.getTitle() + FileChars.INNER_SEPERATOR +
-                    note.getText() + FileChars.OUTER_SEPERATOR);
+            out.print(note.getTitle() + FileChars.INNER_SEPARATOR +
+                    note.getText() + FileChars.OUTER_SEPARATOR);
 
             out.close();
         }catch (Exception e){}
@@ -146,8 +146,8 @@ public class NodeServiceLocal implements NoteActions {
                     context.openFileOutput(NOTE_NAME,Context.MODE_APPEND));
 
             for (Note note: notes)
-                out.print(note.getTitle() + FileChars.INNER_SEPERATOR +
-                        note.getText() + FileChars.OUTER_SEPERATOR);
+                out.print(note.getTitle() + FileChars.INNER_SEPARATOR +
+                        note.getText() + FileChars.OUTER_SEPARATOR);
 
             out.close();
         } catch (IOException e) { }

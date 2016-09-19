@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             nsl = new NodeServiceLocal(this);
             List<Note> notes = nsl.getNotes();
-
+            notes.add(new Note("test","test"));
             gv.setAdapter(new GridViewAdapter(notes));
 
             gv.setOnItemClickListener((parent, view, position, id) -> {
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             });
         }catch (Exception e){
-            Snackbar.make(coordinatorLayout, "Cannot load the notes", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(coordinatorLayout, "Cannot load the notes\nerror: " + e.toString(), Snackbar.LENGTH_INDEFINITE).show();
         }
 
 
