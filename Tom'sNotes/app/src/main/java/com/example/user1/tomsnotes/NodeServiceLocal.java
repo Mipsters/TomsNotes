@@ -31,6 +31,9 @@ public class NodeServiceLocal implements NoteActions {
 
     @Override
     public void saveNote(Note note) throws IOException {
+        if(note.getText().equals(""))
+            note.setText(Character.toString((char)5));
+
         notes.add(note);
         this.note = note;
 
@@ -82,7 +85,8 @@ public class NodeServiceLocal implements NoteActions {
                     case 0:
                         File file = new File(context.getFilesDir(), "notes.txt");
 
-                        if (!file.createNewFile());
+                        if (!file.exists())
+                            file.createNewFile();
 
                         BufferedReader in = new BufferedReader(
                                 new InputStreamReader(
@@ -91,14 +95,14 @@ public class NodeServiceLocal implements NoteActions {
                         String line, strdata = "";
 
                         while ((line = in.readLine()) != null)
-                            strdata += line;
+                            strdata += line + '\n';
 
                         String[] allData = strdata.split(Character.toString((char) 6));
 
                         for (String oneData : allData) {
                             String[] data = oneData.split(Character.toString((char) 7));
                             if (data.length == 2)
-                                notes.add(new Note(data[0], data[1]));
+                                notes.add(new Note(data[0], data[1].equals(Character.toString((char)5)) ? "" : data[1]));
                         }
 
                         in.close();

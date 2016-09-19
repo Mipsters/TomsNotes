@@ -28,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         GridView gv = (GridView) findViewById(R.id.gridView);
 
+        if(getResources().getConfiguration().orientation == 2)
+            gv.setColumnWidth(0);
+
         fab.setOnClickListener(v ->
             startActivity(new Intent(this, NoteEdit.class)));
 
