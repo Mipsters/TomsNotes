@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class NodeServiceLocal implements NoteActions {
 
+    private enum FileManagment {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
+
     private ArrayList<Note> notes;
     private Context context;
     private Note note;
@@ -26,7 +28,7 @@ public class NodeServiceLocal implements NoteActions {
         notes = new ArrayList<>();
         this.note = null;
 
-        new FileManagmentTask().execute(0);
+        new FileManagmentTask().execute(FileManagment.READ_FROM_FILE);
     }
 
     @Override
@@ -37,19 +39,19 @@ public class NodeServiceLocal implements NoteActions {
         notes.add(note);
         this.note = note;
 
-        new FileManagmentTask().execute(1);
+        new FileManagmentTask().execute(FileManagment.WRITE_TO_FILE);
     }
 
     @Override
     public void deleteNote(int location) {
         notes.remove(location);
-        new FileManagmentTask().execute(2);
+        new FileManagmentTask().execute(FileManagment.REWRITE_FILE);
     }
 
     @Override
     public void editNote(int location, Note newNote) {
         notes.set(location,newNote);
-        new FileManagmentTask().execute(2);
+        new FileManagmentTask().execute(FileManagment.REWRITE_FILE);
     }
 
     @Override
@@ -57,8 +59,70 @@ public class NodeServiceLocal implements NoteActions {
         return Collections.unmodifiableList(notes);
     }
 
+    private class FileManagmentTask extends AsyncTask<FileManagment, Void, Void>{
+
+        @Override
+        protected Void doInBackground(FileManagment... params) {
+            switch (params[0]) {
+                case READ_FROM_FILE:
+                    readFromFile();
+                    break;
+                case WRITE_TO_FILE:
+                    writeToFile();
+                    break;
+                case REWRITE_FILE:
+                    recreateFile();
+                    break;
+            }
+            return null;
+        }
+    }
+
+    private void readFromFile(){
+        File file = new File(context.getFilesDir(), "notes.txt");
+
+        try {
+            if (!file.exists())
+                file.createNewFile();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                            context.openFileInput("notes.txt")));
+
+            String line, strdata = "";
+
+            while ((line = in.readLine()) != null)
+                strdata += line + '\n';
+
+            String[] allData = strdata.split(Character.toString((char) 6));
+
+            for (String oneData : allData) {
+                String[] data = oneData.split(Character.toString((char) 7));
+                if (data.length == 2)
+                    notes.add(new Note(data[0], data[1].equals(Character.toString((char) 5)) ? "" : data[1]));
+            }
+
+            in.close();
+        }catch (Exception e){}
+    }
+
+    private void writeToFile(){
+        try {
+            PrintWriter out = new PrintWriter(
+                    context.openFileOutput("notes.txt", Context.MODE_APPEND));
+
+            out.print(note.getTitle() + Character.toString((char) 7) +
+                    note.getText() + Character.toString((char) 6));
+            out.flush();
+            note = null;
+
+            out.close();
+        }catch (Exception e){}
+    }
+
     private void recreateFile(){
         File file = new File(context.getFilesDir(),"notes.txt");
+
         while(!file.delete());
 
         try {
@@ -74,56 +138,5 @@ public class NodeServiceLocal implements NoteActions {
             out.flush();
 
         } catch (IOException e) { }
-    }
-
-    private class FileManagmentTask extends AsyncTask<Integer, Void, Void>{
-
-        @Override
-        protected Void doInBackground(Integer... params) {
-            try {
-                switch (params[0]) {
-                    case 0:
-                        File file = new File(context.getFilesDir(), "notes.txt");
-
-                        if (!file.exists())
-                            file.createNewFile();
-
-                        BufferedReader in = new BufferedReader(
-                                new InputStreamReader(
-                                        context.openFileInput("notes.txt")));
-
-                        String line, strdata = "";
-
-                        while ((line = in.readLine()) != null)
-                            strdata += line + '\n';
-
-                        String[] allData = strdata.split(Character.toString((char) 6));
-
-                        for (String oneData : allData) {
-                            String[] data = oneData.split(Character.toString((char) 7));
-                            if (data.length == 2)
-                                notes.add(new Note(data[0], data[1].equals(Character.toString((char)5)) ? "" : data[1]));
-                        }
-
-                        in.close();
-                        break;
-                    case 1:
-                        PrintWriter out = new PrintWriter(
-                                context.openFileOutput("notes.txt",Context.MODE_APPEND));
-
-                        out.print(note.getTitle() + Character.toString((char) 7) +
-                                note.getText() + Character.toString((char) 6));
-                        out.flush();
-                        note = null;
-
-                        out.close();
-                        break;
-                    case 2:
-                        recreateFile();
-                        break;
-                }
-            }catch (Exception e){}
-            return null;
-        }
     }
 }
