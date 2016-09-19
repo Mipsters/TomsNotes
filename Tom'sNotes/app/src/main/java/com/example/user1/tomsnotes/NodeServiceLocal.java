@@ -5,12 +5,14 @@ import android.os.AsyncTask;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Created by USER1 on 15/09/2016.
@@ -26,13 +28,13 @@ public class NodeServiceLocal implements NoteActions {
                 return Character.toString((char)5);
             }
         },
-        INNER_SEPERATOR{
+        OUTER_SEPERATOR{
             @Override
             public String toString(){
                 return Character.toString((char)6);
             }
         },
-        OUTER_SEPERATOR{
+        INNER_SEPERATOR{
             @Override
             public String toString(){
                 return Character.toString((char)7);
@@ -86,7 +88,7 @@ public class NodeServiceLocal implements NoteActions {
         protected Void doInBackground(FileManagment... params) {
             switch (params[0]) {
                 case READ_FROM_FILE:
-                    readFromFile();
+                    scanFromFile();
                     break;
                 case WRITE_TO_FILE:
                     writeToFile();
@@ -98,32 +100,22 @@ public class NodeServiceLocal implements NoteActions {
             return null;
         }
     }
-
-    private void readFromFile(){
+    
+    void scanFromFile(){
         File file = new File(context.getFilesDir(), NOTE_NAME);
 
         try {
             file.createNewFile();
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(
-                            context.openFileInput(NOTE_NAME)));
+            Scanner read = new Scanner(context.openFileInput(NOTE_NAME));
+            read.useDelimiter(FileChars.OUTER_SEPERATOR.toString());
 
-            String line, strdata = "";
-
-            while ((line = in.readLine()) != null)
-                strdata += line + '\n';
-
-            String[] allData = strdata.split(FileChars.INNER_SEPERATOR.toString());
-
-            for (String oneData : allData) {
-                String[] data = oneData.split(FileChars.OUTER_SEPERATOR.toString());
+            while(read.hasNext()) {
+                String[] data = read.next().split(FileChars.INNER_SEPERATOR.toString());
                 if (data.length == 2)
-                    notes.add(new Note(data[0], data[1].equals(FileChars.EMPTY_FILE) ? "" : data[1]));
+                    notes.add(new Note(data[0],data[1]));
             }
-
-            in.close();
-        }catch (Exception e){}
+        } catch (Exception e) { }
     }
 
     private void writeToFile(){
@@ -131,9 +123,9 @@ public class NodeServiceLocal implements NoteActions {
             PrintWriter out = new PrintWriter(
                     context.openFileOutput(NOTE_NAME, Context.MODE_APPEND));
 
-            out.print(note.getTitle() + FileChars.OUTER_SEPERATOR +
-                    note.getText() + FileChars.INNER_SEPERATOR);
-            out.flush();
+            out.print(note.getTitle() + FileChars.INNER_SEPERATOR +
+                    note.getText() + FileChars.OUTER_SEPERATOR);
+
             note = null;
 
             out.close();
@@ -152,11 +144,10 @@ public class NodeServiceLocal implements NoteActions {
                     context.openFileOutput(NOTE_NAME,Context.MODE_APPEND));
 
             for (Note note: notes)
-                out.print(note.getTitle() + FileChars.OUTER_SEPERATOR +
-                        note.getText() + FileChars.INNER_SEPERATOR);
+                out.print(note.getTitle() + FileChars.INNER_SEPERATOR +
+                        note.getText() + FileChars.OUTER_SEPERATOR);
 
-            out.flush();
-
+            out.close();
         } catch (IOException e) { }
     }
 }
