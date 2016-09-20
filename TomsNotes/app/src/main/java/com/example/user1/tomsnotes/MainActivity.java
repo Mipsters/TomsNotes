@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     static NodeServiceLocal nsl;
     private Boolean delete = false;
+    private GridView gv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,63 +28,75 @@ public class MainActivity extends AppCompatActivity {
 
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        GridView gv = (GridView) findViewById(R.id.gridView);
+        gv = (GridView) findViewById(R.id.gridView);
 
         if(getResources().getConfiguration().orientation == 2)
             gv.setColumnWidth(0);
 
-        fab.setOnClickListener(v ->
-            startActivity(new Intent(this, NoteEdit.class)));
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               startActivity(new Intent(MainActivity.this, NoteEdit.class));
+           }
+        });
 
         nsl = null;
 
         try {
             nsl = new NodeServiceLocal(this);
-            List<Note> notes = nsl.getNotes();
+            final List<Note> notes = nsl.getNotes();
             
             gv.setAdapter(new GridViewAdapter(notes));
 
-            gv.setOnItemClickListener((parent, view, position, id) -> {
-                Intent intent = new Intent(this, NoteEdit.class);
+            gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent intent = new Intent(MainActivity.this, NoteEdit.class);
 
-                intent.putExtra("title",notes.get(position).getTitle());
-                intent.putExtra("text",notes.get(position).getText());
-                intent.putExtra("loc",position);
+                    intent.putExtra("title",notes.get(position).getTitle());
+                    intent.putExtra("text",notes.get(position).getText());
+                    intent.putExtra("loc",position);
 
-                startActivity(intent);
+                    startActivity(intent);
+                }
             });
 
-            gv.setOnItemLongClickListener((parent, view, position, id) -> {
-                if(!delete) {
-                    delete = true;
+            gv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view,final int position, long id) {
+                    if(!delete) {
+                        delete = true;
 
-                    Snackbar.make(view, "deleting note...", Snackbar.LENGTH_LONG)
-                            .setCallback(new Snackbar.Callback() {
-                                @Override
-                                public void onDismissed(Snackbar snackbar, int event) {
-                                    if (delete) {
-                                        nsl.deleteNote(position);
-                                        gv.setAdapter(new GridViewAdapter(notes));
-                                        delete = false;
+                        Snackbar.make(view, "deleting note...", Snackbar.LENGTH_LONG)
+                                .setCallback(new Snackbar.Callback() {
+                                    @Override
+                                    public void onDismissed(Snackbar snackbar, int event) {
+                                        if (delete) {
+                                            nsl.deleteNote(position);
+                                            gv.setAdapter(new GridViewAdapter(notes));
+                                            delete = false;
+                                        }
                                     }
-                                }
-                            }).setAction("cancel", (v) -> delete = false)
-                            .show();
+                                }).setAction("cancel", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                delete = false;
+                            }
+                        }).show();
+                    }
+                    return true;
                 }
-                return true;
             });
         }catch (Exception e){
             Snackbar.make(coordinatorLayout, "Cannot load the notes\nerror: " + e.toString(), Snackbar.LENGTH_INDEFINITE).show();
         }
-
-
     }
 
     class GridViewAdapter extends BaseAdapter{
 
         List<Note> data;
 
-        public GridViewAdapter(List list){
+        private GridViewAdapter(List<Note> list){
             data = list;
         }
 
