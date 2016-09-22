@@ -17,7 +17,7 @@ import java.util.Scanner;
 /**
  * Created by USER1 on 15/09/2016.
  */
-public class NodeServiceLocal implements NoteActions {
+class NodeServiceLocal implements NoteActions {
 
     private static final String NOTE_NAME = "notes.txt";
     private enum FileManagement {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
@@ -45,7 +45,7 @@ public class NodeServiceLocal implements NoteActions {
     private ArrayList<Note> notes;
     private Context context;
 
-    public NodeServiceLocal(Context context) throws IOException {
+    NodeServiceLocal(Context context) throws IOException {
         this.context = context;
         notes = new ArrayList<>();
 
@@ -82,9 +82,9 @@ public class NodeServiceLocal implements NoteActions {
     private class FileManagementTask extends AsyncTask<FileManagement, Void, Void>{
         private Note note;
 
-        public FileManagementTask(){}
+        private FileManagementTask(){}
 
-        public FileManagementTask(Note note){
+        private FileManagementTask(Note note){
             this.note = note;
         }
 
@@ -105,7 +105,7 @@ public class NodeServiceLocal implements NoteActions {
         }
     }
     
-    void scanFromFile(){
+    private void scanFromFile(){
         File file = new File(context.getFilesDir(), NOTE_NAME);
 
         try {
