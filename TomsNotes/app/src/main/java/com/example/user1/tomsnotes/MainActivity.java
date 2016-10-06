@@ -18,7 +18,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    static NoteServiceServer nsl;
+    static NodeServiceLocal nsl;
     private Boolean delete = false;
     private GridView gv;
 
@@ -44,8 +44,7 @@ public class MainActivity extends AppCompatActivity {
         nsl = null;
 
         try {
-            //nsl = new NodeServiceLocal(this);
-            nsl = NoteServiceServer.getInstance();
+            nsl = new NodeServiceLocal(this);
             final List<Note> notes = nsl.getNotes();
             
             gv.setAdapter(new GridViewAdapter(notes));

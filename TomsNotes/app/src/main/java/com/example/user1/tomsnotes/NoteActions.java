@@ -14,7 +14,7 @@ public interface NoteActions {
 
     void deleteNote(int location);
 
-    void editNote(int location, Note newNote);
+    void editNote(int locaton, Note newNote);
 
     List<Note> getNotes();
 }
