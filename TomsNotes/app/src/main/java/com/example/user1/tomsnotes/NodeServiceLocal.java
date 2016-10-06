@@ -3,11 +3,8 @@ package com.example.user1.tomsnotes;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,8 +14,7 @@ import java.util.Scanner;
 /**
  * Created by USER1 on 15/09/2016.
  */
-class NodeServiceLocal implements NoteActions {
-
+public class NodeServiceLocal implements NoteActions {
     private static final String NOTE_NAME = "notes.txt";
     private enum FileManagement {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
     private enum FileChars {
@@ -45,7 +41,7 @@ class NodeServiceLocal implements NoteActions {
     private ArrayList<Note> notes;
     private Context context;
 
-    NodeServiceLocal(Context context) throws IOException {
+    public NodeServiceLocal(Context context) throws IOException {
         this.context = context;
         notes = new ArrayList<>();
 
