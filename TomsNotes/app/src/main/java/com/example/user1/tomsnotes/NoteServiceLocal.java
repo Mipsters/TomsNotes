@@ -14,7 +14,7 @@ import java.util.Scanner;
 /**
  * Created by USER1 on 15/09/2016.
  */
-public class NodeServiceLocal implements NoteActions {
+public class NoteServiceLocal implements NoteActions {
 
     private enum FileManagement {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
     private enum FileChars {
@@ -43,7 +43,7 @@ public class NodeServiceLocal implements NoteActions {
     private Context context;
     private Runnable runnable;
 
-    public NodeServiceLocal(Context context, Runnable runnable) {
+    public NoteServiceLocal(Context context, Runnable runnable) {
         this.context = context;
         this.runnable = runnable;
         notes = new ArrayList<>();

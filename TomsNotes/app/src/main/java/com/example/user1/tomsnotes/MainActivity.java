@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,12 +20,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    static NodeServiceServer nsl;
+    public static NoteServiceServer nsl;
     private Boolean delete = false;
     private GridView gv;
-    private int prevOrientation;
-
-    private static final boolean USE_SERVER = true;
+    private List<Note> notes;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,54 +41,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Runnable runnable = new Runnable() {
+        gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void run() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, NoteEdit.class);
 
-                final List<Note> notes = nsl.getNotes();
-                gv.setAdapter(new GridViewAdapter(notes));
+                if(notes != null) {
+                    intent.putExtra("title", notes.get(position).getTitle());
+                    intent.putExtra("text", notes.get(position).getText());
+                    intent.putExtra("loc", position);
 
-                gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Intent intent = new Intent(MainActivity.this, NoteEdit.class);
-
-                        intent.putExtra("title", notes.get(position).getTitle());
-                        intent.putExtra("text", notes.get(position).getText());
-                        intent.putExtra("loc", position);
-
-                        startActivity(intent);
-                    }
-                });
-
-                gv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                    @Override
-                    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                        if (!delete) {
-                            delete = true;
-
-                            Snackbar.make(view, "deleting note...", Snackbar.LENGTH_LONG)
-                                    .setCallback(new Snackbar.Callback() {
-                                        @Override
-                                        public void onDismissed(Snackbar snackbar, int event) {
-                                            if (delete) {
-                                                nsl.deleteNote(position);
-                                                gv.setAdapter(new GridViewAdapter(notes));
-                                                delete = false;
-                                            }
-                                        }
-                                    }).setAction("cancel", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    delete = false;
-                                }
-                            }).show();
-                        }
-                        return true;
-                    }
-                });
+                    startActivity(intent);
+                }
             }
-        };
+        });
+
+        gv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                if (!delete) {
+                    delete = true;
+
+                    Snackbar.make(view, "deleting note...", Snackbar.LENGTH_LONG)
+                            .setCallback(new Snackbar.Callback() {
+                                @Override
+                                public void onDismissed(Snackbar snackbar, int event) {
+                                    if (delete) {
+                                        nsl.deleteNote(position);
+                                        if(notes != null)
+                                            gv.setAdapter(new GridViewAdapter(notes));
+                                        delete = false;
+                                    }
+                                }
+                            }).setAction("cancel", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            delete = false;
+                        }
+                    }).show();
+                }
+                return true;
+            }
+        });
 
         if (getResources().getConfiguration().orientation == 2) {
             gv.setColumnWidth((int) convertDpToPixel(150, this));
@@ -99,18 +91,32 @@ public class MainActivity extends AppCompatActivity {
             gv.setColumnWidth((int) convertDpToPixel(90, this));
         }
 
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                notes = nsl.getNotes();
+                gv.setAdapter(new GridViewAdapter(notes));
+            }
+        };
+
         if(nsl != null)
             runnable.run();
 
-        nsl = NodeServiceServer.getInstance(runnable);
-        //nsl = new NodeServiceLocal(this, runnable);
+        nsl = NoteServiceServer.getInstance(runnable);
+        //nsl = new NoteServiceLocal(this, runnable);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(nsl != null)
+            runnable.run();
     }
 
     public static float convertDpToPixel(float dp, Context context){
         Resources resources = context.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
-        float px = dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        return px;
+        return dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     class GridViewAdapter extends BaseAdapter{

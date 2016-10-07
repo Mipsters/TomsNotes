@@ -13,19 +13,23 @@ import java.util.List;
 /**
  * Created by Tom on 07/10/2016.
  */
-public class NodeServiceServer implements NoteActions {
+public class NoteServiceServer implements NoteActions {
 
     private List<Note> notes;
     private static Runnable runnable;
 
-    private static NodeServiceServer ourInstance = new NodeServiceServer();
+    private static NoteServiceServer ourInstance = new NoteServiceServer();
 
-    public static NodeServiceServer getInstance(Runnable runnable) {
-        NodeServiceServer.runnable = runnable;
+    public static NoteServiceServer getInstance(Runnable runnable) {
+        NoteServiceServer.runnable = runnable;
         return ourInstance;
     }
 
-    private NodeServiceServer() {
+    public static NoteServiceServer getInstance(){
+        return ourInstance;
+    }
+
+    private NoteServiceServer() {
         notes = new ArrayList<>();
         ParseQuery<Note> query = ParseQuery.getQuery("Note");
         query.findInBackground(new FindCallback<Note>() {

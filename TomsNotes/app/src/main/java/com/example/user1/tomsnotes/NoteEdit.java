@@ -11,6 +11,7 @@ import android.widget.Toast;
 public class NoteEdit extends AppCompatActivity {
 
     private EditText title, text;
+    private NoteServiceServer nsl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class NoteEdit extends AppCompatActivity {
 
         title = (EditText)findViewById(R.id.editText);
         text = (EditText)findViewById(R.id.editText2);
+        nsl = NoteServiceServer.getInstance();
 
         Intent intent = getIntent();
 
@@ -39,14 +41,14 @@ public class NoteEdit extends AppCompatActivity {
             public void onClick(View v) {
                 if(loc != -1)
                     try {
-                        MainActivity.nsl.editNote(loc,new Note(title.getText().toString(),
+                        nsl.editNote(loc,new Note(title.getText().toString(),
                                 text.getText().toString()));
                     } catch (Exception e) {
                         Toast.makeText(NoteEdit.this,"couldn't edit the note",Toast.LENGTH_SHORT).show();
                     }
                 else
                     try {
-                        MainActivity.nsl.saveNote(new Note(title.getText().toString(),
+                        nsl.saveNote(new Note(title.getText().toString(),
                                 text.getText().toString()));
                     } catch (Exception e) {
                         Toast.makeText(NoteEdit.this,"couldn't add the note",Toast.LENGTH_SHORT).show();
