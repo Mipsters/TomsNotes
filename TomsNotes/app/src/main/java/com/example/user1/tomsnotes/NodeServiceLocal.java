@@ -3,11 +3,8 @@ package com.example.user1.tomsnotes;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,9 +14,8 @@ import java.util.Scanner;
 /**
  * Created by USER1 on 15/09/2016.
  */
-class NodeServiceLocal implements NoteActions {
+public class NodeServiceLocal implements NoteActions {
 
-    private static final String NOTE_NAME = "notes.txt";
     private enum FileManagement {READ_FROM_FILE,WRITE_TO_FILE,REWRITE_FILE}
     private enum FileChars {
         EMPTY_FILE {
@@ -42,18 +38,21 @@ class NodeServiceLocal implements NoteActions {
         }
     }
 
-    private ArrayList<Note> notes;
+    private static final String NOTE_NAME = "notes.txt";
+    private List<Note> notes;
     private Context context;
+    private Runnable runnable;
 
-    NodeServiceLocal(Context context) throws IOException {
+    public NodeServiceLocal(Context context, Runnable runnable) {
         this.context = context;
+        this.runnable = runnable;
         notes = new ArrayList<>();
 
         new FileManagementTask().execute(FileManagement.READ_FROM_FILE);
     }
 
     @Override
-    public void saveNote(Note note) throws IOException {
+    public void saveNote(Note note) {
         if(note.getText().equals(""))
             note.setText(FileChars.EMPTY_FILE.toString());
 
@@ -120,6 +119,8 @@ class NodeServiceLocal implements NoteActions {
                     notes.add(new Note(data[0],data[1]));
             }
         } catch (Exception e) { }
+
+        runnable.run();
     }
 
     private void writeToFile(Note note){

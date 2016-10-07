@@ -1,42 +1,44 @@
 package com.example.user1.tomsnotes;
 
-import java.util.Random;
+
+import com.parse.ParseClassName;
+import com.parse.ParseObject;
 
 /**
  * Created by USER1 on 15/09/2016.
  */
-public class Note {
-    private String title;
-    private String text;
-    private int id;
 
+@ParseClassName("Note")
+public class Note extends ParseObject {
+
+    public Note() {
+        super();
+    }
+    
     public Note(String title, String text){
-        this.title = title;
-        this.text = text;
-        setId();
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    private void setId() {
-        this.id = (new Random()).nextInt();
+        super();
+        setTitle(title);
+        setText(text);
     }
 
     public String getTitle() {
-        return title;
+        return getString("title");
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        put("title",title);
     }
 
     public String getText() {
-        return text;
+        return getString("text");
     }
 
     public void setText(String text) {
-        this.text = text;
+        put("text",text);
+    }
+
+    public void copyNote(Note note){
+        setTitle(note.getTitle());
+        setText(note.getText());
     }
 }
