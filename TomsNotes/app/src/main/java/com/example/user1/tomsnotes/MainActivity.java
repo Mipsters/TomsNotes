@@ -84,12 +84,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (getResources().getConfiguration().orientation == 2) {
+        if (getResources().getConfiguration().orientation == 2)
             gv.setColumnWidth((int) convertDpToPixel(150, this));
-        }
-        else {
+        else
             gv.setColumnWidth((int) convertDpToPixel(90, this));
-        }
 
         runnable = new Runnable() {
             @Override
